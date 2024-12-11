@@ -44,7 +44,7 @@ class _UsernameStatusCheckerState extends State<UsernameStatusChecker> {
     _statusTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
       try {
         // Replace with your API endpoint for status check
-        final response = await http.post(Uri.parse('http://127.0.0.1:8080/api/v1/indicator/$username'));
+        final response = await http.post(Uri.parse('http://localhost:6665/api/v1/indicator/$username'));
         if (response.statusCode == 200) {
           setState(() {
             _statuses = Map<String, String>.from(jsonDecode(response.body));
