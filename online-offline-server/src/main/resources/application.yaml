@@ -4,3 +4,6 @@ spring:
       host: "34.131.69.168"
       port: 6379
       password: root
+
+server:
+  port: 6665
