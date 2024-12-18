@@ -4,13 +4,15 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: UsernameStatusChecker(),
     );
@@ -18,6 +20,8 @@ class MyApp extends StatelessWidget {
 }
 
 class UsernameStatusChecker extends StatefulWidget {
+  const UsernameStatusChecker({super.key});
+
   @override
   _UsernameStatusCheckerState createState() => _UsernameStatusCheckerState();
 }
@@ -25,6 +29,7 @@ class UsernameStatusChecker extends StatefulWidget {
 class _UsernameStatusCheckerState extends State<UsernameStatusChecker> {
   final TextEditingController _usernameController = TextEditingController();
   Map<String, String>? _statuses;
+  String? _errorMessage;
   Timer? _statusTimer;
 
   @override
@@ -41,19 +46,28 @@ class _UsernameStatusCheckerState extends State<UsernameStatusChecker> {
 
   void _startStatusCheck(String username) {
     _statusTimer?.cancel(); // Cancel any existing timer
-    _statusTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+    _statusTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       try {
         // Replace with your API endpoint for status check
-        final response = await http.post(Uri.parse('http://localhost:6665/api/v1/indicator/$username'));
+        // final response = await http.post(Uri.parse('http://34.131.119.223:6665/api/v1/indicator/$username'));
+        final response = await http.get(Uri.parse('http://localhost:6665/api/v1/indicator/$username'),
+            headers: {'Referer': 'no-referrer'},);
         if (response.statusCode == 200) {
           setState(() {
             _statuses = Map<String, String>.from(jsonDecode(response.body));
+            _errorMessage = null; // Clear any previous errors
           });
         } else {
-          print('Failed to fetch statuses: ${response.statusCode}');
+          setState(() {
+            _errorMessage = 'Failed to fetch statuses: ${response.statusCode}';
+            _statuses = null;
+          });
         }
       } catch (e) {
-        print('Error fetching statuses: $e');
+        setState(() {
+          _errorMessage = 'Error fetching statuses: $e';
+          _statuses = null;
+        });
       }
     });
   }
@@ -62,7 +76,7 @@ class _UsernameStatusCheckerState extends State<UsernameStatusChecker> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Username Status Checker'),
+        title: const Text('Username Status Checker'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -71,7 +85,7 @@ class _UsernameStatusCheckerState extends State<UsernameStatusChecker> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Enter a username',
                 border: OutlineInputBorder(),
               ),
@@ -81,7 +95,7 @@ class _UsernameStatusCheckerState extends State<UsernameStatusChecker> {
                 }
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
                 final username = _usernameController.text.trim();
@@ -89,11 +103,18 @@ class _UsernameStatusCheckerState extends State<UsernameStatusChecker> {
                   _startStatusCheck(username);
                 }
               },
-              child: Text('Start Checking Status'),
+              child: const Text('Start Checking Status'),
             ),
-            if (_statuses != null) ...[
-              SizedBox(height: 16),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16),
               Text(
+                'Error: $_errorMessage',
+                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+            ],
+            if (_statuses != null) ...[
+              const SizedBox(height: 16),
+              const Text(
                 'Statuses:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),

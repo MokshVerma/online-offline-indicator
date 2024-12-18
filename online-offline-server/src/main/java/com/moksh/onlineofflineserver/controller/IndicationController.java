@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -21,10 +18,14 @@ public class IndicationController {
     private final IndicatorService indicatorService;
 
     @PostMapping("/{username}")
+    @CrossOrigin
     public ResponseEntity<Map<String, String>> heartbeat(@PathVariable("username") String username) {
         log.info("Received heartbeat request");
         Map<String, String> map = indicatorService.heartbeat(username);
-        return ResponseEntity.ok(map);
+        return ResponseEntity.ok()
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "POST, OPTIONS")
+                .header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept").body(map);
     }
 
 }
